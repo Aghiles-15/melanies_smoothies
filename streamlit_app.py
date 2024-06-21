@@ -1,5 +1,6 @@
   # Importer les packages nécessaires
 import streamlit as st
+import pandas as pd  # Ajout de l'importation de pandas
 from snowflake.snowpark.session import Session
 from snowflake.snowpark.functions import col
 import requests  # Déplacer l'instruction d'importation en haut
