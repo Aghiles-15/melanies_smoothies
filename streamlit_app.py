@@ -27,8 +27,9 @@ st.write("Le nom sur votre smoothie sera :", name_on_order)
 
 # Utiliser la session active
 session = get_active_session()
-my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME')).to_pandas()
+my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME'),col('SEARCH_ON')).to_pandas()
 st.dataframe(data=my_dataframe, use_container_width=True)
+st.stop()
 
 ingredients_list = st.multiselect('Choisissez les 5 meilleurs ingrédients :', my_dataframe['FRUIT_NAME'], max_selections=5)
 
