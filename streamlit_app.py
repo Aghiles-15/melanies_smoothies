@@ -1,7 +1,8 @@
-# Importer les packages nécessaires
+  # Importer les packages nécessaires
 import streamlit as st
 from snowflake.snowpark.session import Session
 from snowflake.snowpark.functions import col
+import requests  # Déplacer l'instruction d'importation en haut
 
 # Définir la fonction pour obtenir une session active
 def get_active_session():
@@ -14,44 +15,37 @@ def get_active_session():
         "database": "SMOOTHIES",
         "schema": "PUBLIC"
     }
-	
-
-	
-	
     session = Session.builder.configs(connection_parameters).create()
     return session
 
 # Écrire directement dans l'application
-st.title(":cup_with_straw: Customize Your Smoothie! :cup_with_straw:")
-st.write("Choose the fruits you want in your custom Smoothie!")
+st.title(":cup_with_straw: Personnalisez votre smoothie! :cup_with_straw:")
+st.write("Choisissez les fruits que vous voulez dans votre smoothie personnalisé!")
 
-name_on_order = st.text_input("Name on Smoothie")
-st.write("The name in your smoothie will be:", name_on_order)
+name_on_order = st.text_input("Nom sur le smoothie")
+st.write("Le nom sur votre smoothie sera :", name_on_order)
 
 # Utiliser la session active
 session = get_active_session()
 my_dataframe = session.table("smoothies.public.fruit_options").select(col('FRUIT_NAME')).to_pandas()
 st.dataframe(data=my_dataframe, use_container_width=True)
 
-ingredients_list = st.multiselect('Choose the top 5 ingredients:', my_dataframe['FRUIT_NAME'], max_selections=5)
+ingredients_list = st.multiselect('Choisissez les 5 meilleurs ingrédients :', my_dataframe['FRUIT_NAME'], max_selections=5)
 
 if ingredients_list:
-    ingredients_string = ' '.join(ingredients_list)
+    ingredients_string = ''
+    for fruit_chosen in ingredients_list:
+        ingredients_string += fruit_chosen + ' '
+        fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{fruit_chosen.lower()}")
+        fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
+
     st.write(ingredients_string)
 
-    my_insert_stmt = f"INSERT INTO smoothies.public.orders (ingredients, name_on_order) VALUES ('{ingredients_string}', '{name_on_order}')"
+    my_insert_stmt = f"INSERT INTO smoothies.public.orders (ingredients, name_on_order) VALUES ('{ingredients_string.strip()}', '{name_on_order}')"
     st.write(my_insert_stmt)
 
-time_to_insert = st.button('Submit Order')
+time_to_insert = st.button('Soumettre la commande')
 
 if time_to_insert:
     session.sql(my_insert_stmt).collect()
-    st.success('Your Smoothie is ordered!', icon="✅")
-
-import requests
-fruityvice_response = requests.get("https://fruityvice.com/api/fruit/watermelon")
-#st.text(fruityvice_response.json())
-#fv_df = st.dataframe(data=fruityvice_response.jason(), use_container_width=True)
-
-fv_df = fruityvice_response.json()
-st.dataframe(data=fv_df, use_container_width=True)
+    st.success('Votre smoothie est commandé!', icon="✅")
