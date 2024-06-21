@@ -7,7 +7,7 @@ import requests  # Déplacer l'instruction d'importation en haut
 # Définir la fonction pour obtenir une session active
 def get_active_session():
     connection_parameters = {
-        "account": "BAMQRAZ-AY21624",
+         "account": "BAMQRAZ-AY21624",
         "user": "AGHIL",
         "password": "123Azerty123**",
         "role": "SYSADMIN",
@@ -36,6 +36,7 @@ if ingredients_list:
     ingredients_string = ''
     for fruit_chosen in ingredients_list:
         ingredients_string += fruit_chosen + ' '
+        st.subheader(fruit_chosen + ' Nutrition Information')
         fruityvice_response = requests.get(f"https://fruityvice.com/api/fruit/{fruit_chosen.lower()}")
         fv_df = st.dataframe(data=fruityvice_response.json(), use_container_width=True)
 
